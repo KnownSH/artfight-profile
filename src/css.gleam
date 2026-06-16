@@ -1,5 +1,8 @@
 import gleam/int
 
+pub const float_right = #("float", "right")
+pub const text_base = #("font-size", "1rem")
+
 type StringStyle =
   #(String, String)
 
