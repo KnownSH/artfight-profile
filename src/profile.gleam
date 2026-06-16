@@ -1,21 +1,15 @@
+import components
 import colors
 import css
 import images
 import lustre/attribute.{alt, class, styles}
-import lustre/element.{type Element}
-import lustre/element/html.{a, div, h2, img, p}
+import lustre/element
+import lustre/element/html.{div, h2, img, p, text as t}
 import util
 
-// Text is used soo much
-const t = html.text
+type Element = element.Element(Nil)
 
-fn credits(element: Element(Nil), username: String) -> Element(Nil) {
-  a([attribute.title("by " <> username), attribute.href("#user_do_nothing")], [
-    element,
-  ])
-}
-
-fn bio_template() -> Element(Nil) {
+fn bio_template() -> Element {
   element.fragment([
     h2([], [
       t("Hey! I'm "),
@@ -28,32 +22,34 @@ fn bio_template() -> Element(Nil) {
       t("!"),
     ]),
 
+    img([attribute.src("https://cdn.derg.space/api/counter?id=main-site")]),
+
     p([styles([css.text_base])], [
       img([
         styles([
           css.float_right,
-          #("margin-bottom", "-20px"),
-          #("margin-top", "-30px"),
+          css.margin_bottom("-20px"),
+          css.margin_top("-30px"),
         ]),
         attribute.height(150),
         attribute.width(150),
         images.derg_cdn("doveyknownwomp.webp"),
         alt("derg womp"),
       ])
-        |> credits("missdoveyx"),
+        |> components.credits("missdoveyx"),
 
       t("My main oc is also called "),
       util.bold("Known"),
-      t(", by my username online is usually"),
+      t(", but my username online is usually"),
       util.quotes("Knownser") |> util.bold_italic,
       t(" or "),
-      { util.quotes("KnownSH") <> "." } |> util.bold_italic,
+      util.bold_italic(util.quotes("KnownSH") <> "."),
 
       t(
         "I decided to start drawing about two years ago, so expect my art quality to sometimes be inconsistent!",
       ),
       util.multi_br(count: 2),
-      t("This year im planning on drawing "),
+      t("This year I'm planning on drawing "),
       util.bold("quite a decent amount,"),
       t(" but I also won't make any promises!"),
       util.multi_br(count: 2),
@@ -68,7 +64,7 @@ fn bio_template() -> Element(Nil) {
   ])
 }
 
-fn profile_template() -> Element(Nil) {
+fn profile_template() -> Element {
   div(
     [
       class("container-sm"),
@@ -82,12 +78,12 @@ fn profile_template() -> Element(Nil) {
     ],
     [
       html.br([]),
-
       bio_template(),
     ],
   )
 }
 
+/// Call this via JavaScript ffi
 pub fn render_profile() -> String {
   profile_template()
   |> element.to_string

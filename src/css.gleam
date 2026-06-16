@@ -66,3 +66,11 @@ pub fn padding(size: String) -> StringStyle {
 pub fn vertical_align(align: String) -> StringStyle {
   #("vertical-align", align)
 }
+
+pub fn margin_bottom(val: String) -> StringStyle {
+  #("margin-bottom", val)
+}
+
+pub fn margin_top(val: String) -> StringStyle {
+  #("margin-top", val)
+}

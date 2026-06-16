@@ -1,6 +1,8 @@
+//// For things that are not fully a component, but also would look ugly if inlined
+
 import gleam/list
-import lustre/element/html
 import lustre/element.{type Element}
+import lustre/element/html
 
 pub fn quotes(text: String) -> String {
   "\"" <> text <> "\""
