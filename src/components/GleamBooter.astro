@@ -1,0 +1,8 @@
+---
+import { render_profile } from "../artfightbio.gleam";
+
+const { name = "Knownser" } = Astro.props;
+const profileHtml = render_profile(name);
+---
+
+<div set:html={profileHtml} />
