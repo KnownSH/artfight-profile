@@ -148,7 +148,7 @@ fn traits_template() -> Element {
       styles([
         css.padding_top("0.5em"),
         css.padding_bottom("0.5em"),
-        css.border_left("2px solid " <> colors.ctp_mauve),
+        css.border_left_int(2, css.Solid, colors.ctp_mauve),
         css.background(colors.ctp_mantle)
       ])
     ], [
@@ -182,7 +182,14 @@ fn profile_template() -> Element {
         css.padding("15px 15px 0"),
       ]),
     ],
-    [html.br([]), bio_template(), html.hr([]), traits_template()],
+    [
+      html.br([]), bio_template(), 
+      html.hr([]), traits_template(),
+      util.div_padding(3), // todo here
+      util.div_padding(1), 
+      html.hr([attribute.width(200)]),
+      components.friends_list()
+    ],
   )
 }
 

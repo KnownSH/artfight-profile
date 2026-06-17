@@ -1,5 +1,6 @@
 //// For things that are not fully a component, but also would look ugly if inlined
 
+import gleam/int
 import css
 import lustre/attribute
 import gleam/list
@@ -30,4 +31,8 @@ pub fn fa_arrow_right() -> Element {
     attribute.class("fa-solid fa-arrow-right-long"),
     attribute.styles([css.inline_block])
   ], [])
+}
+
+pub fn div_padding(padding: Int) -> Element {
+  html.div([attribute.class("p-" <> int.to_string(padding))], [])
 }

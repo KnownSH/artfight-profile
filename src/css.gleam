@@ -38,8 +38,12 @@ fn border_style_map(style: BorderStyle) -> String {
   }
 }
 
+fn base_border_props(size: Int, style: BorderStyle, color: String) -> String {
+  int.to_string(size) <> "px " <> border_style_map(style) <> " " <> color
+}
+
 pub fn border_int(size: Int, style: BorderStyle, color: String) -> StringStyle {
-  border(int.to_string(size) <> "px", style, color)
+  #("border", base_border_props(size, style, color))
 }
 
 pub fn border(size: String, style: BorderStyle, color: String) -> StringStyle {
@@ -47,6 +51,10 @@ pub fn border(size: String, style: BorderStyle, color: String) -> StringStyle {
     "border",
     size <> " " <> border_style_map(style) <> " " <> color,
   )
+}
+
+pub fn border_left_int(size: Int, style: BorderStyle, color: String) -> StringStyle {
+  #("border-left", base_border_props(size, style, color))
 }
 
 pub fn border_left(border: String) -> StringStyle {
