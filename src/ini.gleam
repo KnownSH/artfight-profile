@@ -24,7 +24,7 @@ fn tokenizer(lines: List(String)) -> List(Token) {
     let trimmed = string.trim(line)
     case trimmed {
       "[" <> sub -> determine_section_token(sub)
-      ";" <> _ | "#" <> _ -> Error(Comment)
+      ";" <> _ -> Error(Comment)
       _ -> Ok(Key(trimmed))
     }
   })

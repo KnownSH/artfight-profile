@@ -1,27 +1,16 @@
 import colors
 import components
 import css
-import gleam/dict.{type Dict}
+import gleam/dict
 import images
-import ini
 import lustre/attribute.{alt, class, styles}
 import lustre/element
 import lustre/element/html.{div, h2, img, p, text as t}
+import slass.{type SlassGetter}
 import util
 
 type Element =
   element.Element(Nil)
-
-type Style =
-  Dict(String, String)
-
-pub type Slass =
-  fn(String) -> attribute.Attribute(Nil)
-
-fn slass_core(class: String, style: Style) -> attribute.Attribute(message) {
-  let assert Ok(val) = dict.get(style, class)
-  attribute.attribute("style", val)
-}
 
 fn bio_template() -> Element {
   element.fragment([
@@ -81,14 +70,8 @@ type TextContent {
   Slot(List(Element))
 }
 
-fn traits_template() -> Element {
-  let header_style =
-    styles([
-      css.margin("0"),
-      css.line_height("1.05"),
-      css.font_size("1.17em"),
-      css.font_weight(700),
-    ])
+fn traits_template(slass: SlassGetter) -> Element {
+  let header_style = slass(["trait-header"])
 
   let text_content = fn(header: String, text: TextContent) {
     let paragraph = case text {
@@ -190,17 +173,17 @@ fn traits_template() -> Element {
   ])
 }
 
-fn profile_template(slass: Slass) -> Element {
+fn profile_template(slass: SlassGetter) -> Element {
   div(
     [
       class("container-sm"),
-      slass("profile-main"),
+      slass(["profile-main"]),
     ],
     [
       html.br([]),
       bio_template(),
       html.hr([]),
-      traits_template(),
+      traits_template(slass),
       util.div_padding(3),
       // todo here
       util.div_padding(1),
@@ -212,18 +195,8 @@ fn profile_template(slass: Slass) -> Element {
 
 /// Call this via JavaScript ffi
 pub fn render_profile() -> String {
-  let style =
-    ini.read("src/profile.slass", dict.from_list(colors.dcss_vars))
-    |> dict.fold(from: dict.new(), with: fn(acc, key, value) {
-      let computed_style =
-        dict.fold(value, "", fn(style, prop, style_value) {
-          style <> prop <> ":" <> style_value <> ";"
-        })
-      dict.insert(acc, key, computed_style)
-    })
-
-  let slass = fn(class) { slass_core(class, style) }
-
-  profile_template(slass)
+  slass.read("src/profile.slass.ini", dict.from_list(colors.dcss_vars))
+  |> slass.getter
+  |> profile_template
   |> element.to_string
 }
