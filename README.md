@@ -1,3 +1,7 @@
+<div align="center">
+  <img width="302" height="462" alt="chrome_sGoisSnbSQ" src="https://github.com/user-attachments/assets/4277564f-5bbd-4750-a225-27b66fa9245b" />
+</div>
+
 # An Artfight profile
 
 [See what it looks like](https://artfight.net/~Knownser)
