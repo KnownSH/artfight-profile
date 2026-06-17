@@ -20,14 +20,14 @@ fn determine_section_token(chunk: String) -> Result(Token, Token) {
 }
 
 fn tokenizer(lines: List(String)) -> List(Token) {
-  list.filter_map(lines, fn(line) {
-    let trimmed = string.trim(line)
-    case trimmed {
-      "[" <> sub -> determine_section_token(sub)
-      ";" <> _ -> Error(Comment)
-      _ -> Ok(Key(trimmed))
-    }
-  })
+  use line <- list.filter_map(lines)
+  let trimmed = string.trim(line)
+  
+  case trimmed {
+    "[" <> sub -> determine_section_token(sub)
+    ";" <> _ -> Error(Comment)
+    _ -> Ok(Key(trimmed))
+  }
 }
 
 fn strip_quotes(text: String) -> String {

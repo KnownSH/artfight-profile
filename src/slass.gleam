@@ -1,5 +1,5 @@
-import gleam/list
 import gleam/dict.{type Dict}
+import gleam/list
 import ini
 import lustre/attribute
 
@@ -11,24 +11,29 @@ pub type SlassGetter =
 
 pub fn read(
   from path: String,
-  vars variables: Dict(String, String),
+  using variables: Dict(String, String),
 ) -> SlassStylesheet {
-  ini.read(path, variables)
-  |> dict.fold(from: dict.new(), with: fn(acc, key, value) {
-    let computed_style =
-      dict.fold(value, "", fn(style, prop, style_value) {
-        style <> prop <> ":" <> style_value <> ";"
-      })
-    dict.insert(acc, key, computed_style)
-  })
+  let ini_file = ini.read(path, variables)
+  use acc, class_name, properties <- dict.fold(ini_file, dict.new())
+
+  let computed_style = {
+    use style_acc, property, value <- dict.fold(properties, "")
+    style_acc <> property <> ":" <> value <> ";"
+  }
+    
+  dict.insert(acc, class_name, computed_style)
 }
 
 pub fn getter(style stylesheet: SlassStylesheet) -> SlassGetter {
   fn(classes: List(String)) {
-    let merged = list.fold(classes, "", with: fn(style, class) {
-      let assert Ok(val) = dict.get(stylesheet, class)
-      style <> val
+    let style_attribute = attribute.attribute("style", _)
+
+    list.fold(classes, "", with: fn(acc, class) {
+      case dict.get(stylesheet, class) {
+        Ok(style_str) -> acc <> style_str
+        Error(_) -> acc
+      }
     })
-    attribute.attribute("style", merged)
+    |> style_attribute
   }
 }

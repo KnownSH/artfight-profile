@@ -1,3 +1,4 @@
+import simplifile
 import colors
 import components
 import css
@@ -13,8 +14,12 @@ type Element =
   element.Element(Nil)
 
 fn bio_template() -> Element {
+  let h2 = h2([], _)
+  let span = html.span([], _)
+  let sup = html.sup([], _)
+
   element.fragment([
-    h2([], [
+    h2([
       t("Hey! I'm "),
       img([
         styles([css.vertical_align("top")]),
@@ -55,10 +60,10 @@ fn bio_template() -> Element {
       t(" but I also won't make any promises!"),
       util.multi_br(count: 2),
 
-      html.span([], [
+      span([
         t("Please feel free to have a peep below, I have a grand total of "),
         util.bold("two"),
-        html.sup([], [t("(sorry)")]),
+        sup([t("(sorry)")]),
         t(" characters!"),
       ]),
     ]),
@@ -71,7 +76,7 @@ type TextContent {
 }
 
 fn traits_template(slass: SlassGetter) -> Element {
-  let header_style = slass(["trait-header"])
+  let header_style = slass(["trait-header", "nomargin"])
 
   let text_content = fn(header: String, text: TextContent) {
     let paragraph = case text {
@@ -173,30 +178,65 @@ fn traits_template(slass: SlassGetter) -> Element {
   ])
 }
 
+fn ocs_list(slass: SlassGetter) -> Element {
+  div([
+    class("row mx-auto justify-content-center justify-content-sm-between pt-sm-5 pt-2 pl-2 pr-2 pb-2"),
+    slass(["oc-list-root", "nomargin"])
+  ], [
+    components.oc_card(slass, components.OC(
+      name: "known",
+      bouncer: "asddd.webp",
+      bouncer_credits: "cheripuf",
+      pfp: "https://images.artfight.net/character/yahFYpe5Eoa5c8JoI9UdWoXWOG2n8qoEUGgQZlf2Sqh9XofkUoGpfkzLfQkc.png",
+      url: "https://artfight.net/character/6693652.known",
+    )),
+    components.oc_card(slass, components.OC(
+      name: "vera",
+      bouncer: "veralittle-missdoveyx.webp",
+      bouncer_credits: "missdoveyx",
+      pfp: "https://images.artfight.net/character/th_W0rU0sROmwatI3Yzy1QdJ1oMPWUSYJgfcyg7Lnpdvl5LGb24VkHPqU9zaL2G.png",
+      url: "https://artfight.net/character/8628771.vera",
+    ))
+  ])
+}
+
 fn profile_template(slass: SlassGetter) -> Element {
-  div(
-    [
-      class("container-sm"),
-      slass(["profile-main"]),
-    ],
-    [
-      html.br([]),
-      bio_template(),
-      html.hr([]),
-      traits_template(slass),
-      util.div_padding(3),
-      // todo here
-      util.div_padding(1),
-      html.hr([attribute.width(200)]),
-      components.friends_list(),
-    ],
-  )
+  element.fragment([
+    components.header(slass),
+    div(
+      [
+        slass(["profile-main"]),
+      ],
+      [
+        div([class("container-sm"), slass(["profile-content"])], [
+          html.br([]),
+          bio_template(),
+          html.hr([]),
+          traits_template(slass),
+          util.div_padding(3),
+          ocs_list(slass),
+          util.div_padding(1),
+          html.hr([attribute.width(200)]),
+          components.friends_list(),
+          components.breathing_mario(slass),
+          util.div_padding(2),
+        ]),
+        div([slass(["profile-bottom-wave"])], []),
+        components.footer(slass)
+      ],
+    )
+  ])
 }
 
 /// Call this via JavaScript ffi
 pub fn render_profile() -> String {
-  slass.read("src/profile.slass.ini", dict.from_list(colors.dcss_vars))
+  let output = slass.read("src/profile.slass.ini", dict.from_list(colors.dcss_vars))
   |> slass.getter
   |> profile_template
   |> element.to_string
+
+  let _ = simplifile.create_file("out/generated.html")
+  let _ = simplifile.write("out/generated.html", output)
+
+  output
 }

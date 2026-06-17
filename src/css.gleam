@@ -130,7 +130,7 @@ pub fn font_weight(weight: Int) -> StringStyle {
 }
 
 pub fn line_height(height: String) -> StringStyle {
-  #("line_height", height)
+  #("line-height", height)
 }
 
 pub fn white_space(white_space: String) -> StringStyle {
