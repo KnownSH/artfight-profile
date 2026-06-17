@@ -213,9 +213,13 @@ pub fn footer(slass: slass.SlassGetter) -> Element {
     ]),
     html.a([
       attribute.href("https://github.com/KnownSH/artfight-profile"),
-      attribute.class("ms-auto link-warning"),
+      attribute.class("w-100 pl-3"),
+      slass(["footer-source-align"])
     ], [
-      html.i([attribute.class("fa-sharp-duotone fa-solid fa-code"), slass(["footer-source-url-i"])], [])
-    ])
+      html.div(
+        [slass(["footer-source-url-i"])],
+        [html.i([attribute.class("fa-sharp-duotone fa-solid fa-code")], [])]
+      )
+    ]),
   ])
 }

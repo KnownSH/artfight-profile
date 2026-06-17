@@ -222,9 +222,9 @@ fn profile_template(slass: SlassGetter) -> Element {
           util.div_padding(2),
         ]),
         div([slass(["profile-bottom-wave"])], []),
-        components.footer(slass)
+        components.footer(slass),
       ],
-    )
+    ),
   ])
 }
 
