@@ -12,9 +12,9 @@
 
 ## Little explainer
 
-Inline styles are done via a little DSL called **Slass** (Literally just a portmanteau of Style-Class), it's pretty much just a `.ini` file with the ability to inject mustache `{{variables}}`. It only supports semi-colon comments to make it so you can use hex colour values.
+Inline styles are done via a little DSL called **Slass** (Literally just a portmanteau of Style-Class), it's pretty much just a `.ini` file with the ability to inject mustache `{{variables}}`. It only supports semi-colon prefixes for comments, this is purely to make it so you can use hex colour values in your styles without quotes.
 
-Gleam-wise the slass getter function is passed around to each component, and the returned value is used like a lustre attribute record.
+Gleam-wise the slass getter function is passed around to each component, and the returned value is a lustre attribute.
 
 ---
 
