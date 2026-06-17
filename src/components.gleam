@@ -1,5 +1,6 @@
 //// For anything that is not a base html element wrapper
 
+import gleam/list
 import css
 import lustre/attribute
 import lustre/element
@@ -47,4 +48,19 @@ pub fn priority_icon(color color: String, fa font_awesome: String) -> Element {
       attribute.styles([css.inline_block])
     ], [])
   ])
+}
+
+pub fn interests_list(interests: List(String)) -> Element {
+  let unordered = fn(elements) { html.ul([], elements) }
+
+  list.map(interests, fn(interest) {
+    html.li([
+      attribute.styles([
+        css.font_size("1.08em"),
+        css.margin_top("0.1em"),
+        css.line_height("1.12")
+      ])
+    ], [html.text(interest)])
+  })
+  |> unordered
 }

@@ -69,9 +69,12 @@ type TextContent {
 }
 
 fn traits_template() -> Element {
-  let text_root = fn(slot: List(Element)) {
-    div([class("flex-grow-1"), styles([css.min_width("0")])], slot)
-  }
+  let header_style = styles([
+    css.margin("0"),
+    css.line_height("1.05"),
+    css.font_size("1.17em"),
+    css.font_weight(700),
+  ])
 
   let text_content = fn(header: String, text: TextContent) {
     let paragraph = case text {
@@ -79,15 +82,10 @@ fn traits_template() -> Element {
       Slot(slot) -> slot
     }
 
-    element.fragment([
+    div([class("flex-grow-1"), styles([css.min_width("0")])], [
       div(
         [
-          styles([
-            css.margin("0"),
-            css.line_height("1.05"),
-            css.font_size("1.17em"),
-            css.font_weight(700),
-          ]),
+          header_style,
         ],
         [t(header)],
       ),
@@ -115,18 +113,16 @@ fn traits_template() -> Element {
       [
         components.priority_root(True, [
           components.priority_icon("#fab387", "fa-fw fa-solid fa-star"),
-          text_root([
-            text_content(
-              "Priority",
-              Slot([
-                t(" Mutuals "),
-                util.fa_arrow_right(),
-                t(" Interests "),
-                util.fa_arrow_right(),
-                t(" Revenge "),
-              ]),
-            ),
-          ]),
+          text_content(
+            "Priority",
+            Slot([
+              t(" Mutuals "),
+              util.fa_arrow_right(),
+              t(" Interests "),
+              util.fa_arrow_right(),
+              t(" Revenge "),
+            ]),
+          ),
         ]),
 
         components.priority_root(True, [
@@ -134,22 +130,43 @@ fn traits_template() -> Element {
             "#a6e3a1",
             "fa-fw fa-duotone fa-solid fa-check",
           ),
-          text_root([
-            text_content("Will draw", T("Furries, humans (friends only)")),
-          ]),
+          text_content("Will draw", T("Furries, humans (friends only)")),
         ]),
 
         components.priority_root(False, [
           components.priority_icon("#f38ba8", "fa-fw fa-solid fa-ban"),
-          text_root([
-            text_content(
-              "Won't Draw",
-              T("NSFW, gore, highly suggestive, complex anatomy"),
-            ),
-          ]),
+          text_content(
+            "Won't Draw",
+            T("NSFW, gore, highly suggestive, complex anatomy"),
+          ),
         ]),
       ],
     ),
+
+    div([
+      class("col-12 col-sm-4 mt-3 mt-sm-0 pl-4 pl-sm-0"),
+      styles([
+        css.padding_top("0.5em"),
+        css.padding_bottom("0.5em"),
+        css.border_left("2px solid " <> colors.ctp_mauve),
+        css.background(colors.ctp_mantle)
+      ])
+    ], [
+      div([
+        class("text-left text-sm-right pt-3"),
+        styles([css.line_height("1.12")])
+      ], [
+        div([header_style], [t("My interests!")]),
+
+        components.interests_list([
+          "Spaceflight",
+          "Dergs",
+          "3D Modelling",
+          "Computing",
+          "Fancy outfits"
+        ])
+      ])
+    ])
   ])
 }
 

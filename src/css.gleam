@@ -49,6 +49,10 @@ pub fn border(size: String, style: BorderStyle, color: String) -> StringStyle {
   )
 }
 
+pub fn border_left(border: String) -> StringStyle {
+  #("border-left", border)
+}
+
 pub fn color(color: String) -> StringStyle {
   #("color", color)
 }
@@ -75,6 +79,14 @@ pub fn width(width: String) -> StringStyle {
 
 pub fn padding(size: String) -> StringStyle {
   #("padding", size)
+}
+
+pub fn padding_top(size: String) -> StringStyle {
+  #("padding-top", size)
+}
+
+pub fn padding_bottom(size: String) -> StringStyle {
+  #("padding-bottom", size)
 }
 
 pub fn padding_left(size: String) -> StringStyle {
