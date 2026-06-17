@@ -10,6 +10,8 @@ type Token {
   Comment
 }
 
+type Parsed = Dict(String, Dict(String, String))
+
 fn determine_section_token(chunk: String) -> Result(Token, Token) {
   case string.ends_with(chunk, "]") {
     True -> Ok(Section(string.remove_suffix(chunk, "]")))
@@ -34,9 +36,17 @@ fn strip_quotes(text: String) -> String {
   |> string.remove_suffix("\"")
 }
 
-fn parser(lines: List(String)) -> Dict(String, Dict(String, String)) {
-  let tokens = tokenizer(lines)
+fn resolve_mustache(value: String, variables: Dict(String, String)) -> String {
+  dict.fold(variables, from: value, with: fn(acc, key, replacement) {
+    let pattern = "{{" <> key <> "}}"
+    string.replace(acc, each: pattern, with: replacement)
+  })
+}
 
+fn parser(
+  lines: List(String)
+) -> Parsed {
+  let tokens = tokenizer(lines)
   let start_state = #("", dict.new())
 
   let #(_, parsed) =
@@ -52,7 +62,9 @@ fn parser(lines: List(String)) -> Dict(String, Dict(String, String)) {
           case string.split_once(key_line, on: "=") {
             Ok(#(k, v)) -> {
               let clean_key = string.trim(k)
-              let clean_val = string.trim(v) |> strip_quotes
+              let clean_val = 
+                string.trim(v) 
+                |> strip_quotes
 
               let section_dict = case dict.get(sections, current_section) {
                 Ok(existing) -> dict.insert(existing, clean_key, clean_val)
@@ -73,9 +85,14 @@ fn parser(lines: List(String)) -> Dict(String, Dict(String, String)) {
   parsed
 }
 
-pub fn read(path: String) -> Dict(String, Dict(String, String)) {
+pub fn read(
+  path: String, 
+  variables: Dict(String, String),
+) -> Parsed {
   let assert Ok(content) = simplifile.read(from: path)
-  let lines = string.split(content, on: "\n")
+  let lines =
+    resolve_mustache(content, variables)
+    |> string.split(on: "\n")
 
   parser(lines)
 }

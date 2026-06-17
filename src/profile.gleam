@@ -1,7 +1,9 @@
 import colors
 import components
 import css
+import gleam/dict.{type Dict}
 import images
+import ini
 import lustre/attribute.{alt, class, styles}
 import lustre/element
 import lustre/element/html.{div, h2, img, p, text as t}
@@ -9,6 +11,17 @@ import util
 
 type Element =
   element.Element(Nil)
+
+type Style =
+  Dict(String, String)
+
+pub type Slass =
+  fn(String) -> attribute.Attribute(Nil)
+
+fn slass_core(class: String, style: Style) -> attribute.Attribute(message) {
+  let assert Ok(val) = dict.get(style, class)
+  attribute.attribute("style", val)
+}
 
 fn bio_template() -> Element {
   element.fragment([
@@ -69,12 +82,13 @@ type TextContent {
 }
 
 fn traits_template() -> Element {
-  let header_style = styles([
-    css.margin("0"),
-    css.line_height("1.05"),
-    css.font_size("1.17em"),
-    css.font_weight(700),
-  ])
+  let header_style =
+    styles([
+      css.margin("0"),
+      css.line_height("1.05"),
+      css.font_size("1.17em"),
+      css.font_weight(700),
+    ])
 
   let text_content = fn(header: String, text: TextContent) {
     let paragraph = case text {
@@ -143,58 +157,73 @@ fn traits_template() -> Element {
       ],
     ),
 
-    div([
-      class("col-12 col-sm-4 mt-3 mt-sm-0 pl-4 pl-sm-0"),
-      styles([
-        css.padding_top("0.5em"),
-        css.padding_bottom("0.5em"),
-        css.border_left_int(2, css.Solid, colors.ctp_mauve),
-        css.background(colors.ctp_mantle)
-      ])
-    ], [
-      div([
-        class("text-left text-sm-right pt-3"),
-        styles([css.line_height("1.12")])
-      ], [
-        div([header_style], [t("My interests!")]),
+    div(
+      [
+        class("col-12 col-sm-4 mt-3 mt-sm-0 pl-4 pl-sm-0"),
+        styles([
+          css.padding_top("0.5em"),
+          css.padding_bottom("0.5em"),
+          css.border_left_int(2, css.Solid, colors.ctp_mauve),
+          css.background(colors.ctp_mantle),
+        ]),
+      ],
+      [
+        div(
+          [
+            class("text-left text-sm-right pt-3"),
+            styles([css.line_height("1.12")]),
+          ],
+          [
+            div([header_style], [t("My interests!")]),
 
-        components.interests_list([
-          "Spaceflight",
-          "Dergs",
-          "3D Modelling",
-          "Computing",
-          "Fancy outfits"
-        ])
-      ])
-    ])
+            components.interests_list([
+              "Spaceflight",
+              "Dergs",
+              "3D Modelling",
+              "Computing",
+              "Fancy outfits",
+            ]),
+          ],
+        ),
+      ],
+    ),
   ])
 }
 
-fn profile_template() -> Element {
+fn profile_template(slass: Slass) -> Element {
   div(
     [
       class("container-sm"),
-      styles([
-        css.border_int(4, css.Outset, colors.ctp_mauve),
-        css.background(colors.ctp_base),
-        css.min_height("200px"),
-        css.max_width("700px"),
-        css.padding("15px 15px 0"),
-      ]),
+      slass("profile-main"),
     ],
     [
-      html.br([]), bio_template(), 
-      html.hr([]), traits_template(),
-      util.div_padding(3), // todo here
-      util.div_padding(1), 
+      html.br([]),
+      bio_template(),
+      html.hr([]),
+      traits_template(),
+      util.div_padding(3),
+      // todo here
+      util.div_padding(1),
       html.hr([attribute.width(200)]),
-      components.friends_list()
+      components.friends_list(),
     ],
   )
 }
 
 /// Call this via JavaScript ffi
 pub fn render_profile() -> String {
-  profile_template()
+  let style =
+    ini.read("src/profile.slass", dict.from_list(colors.dcss_vars))
+    |> dict.fold(from: dict.new(), with: fn(acc, key, value) {
+      let computed_style =
+        dict.fold(value, "", fn(style, prop, style_value) {
+          style <> prop <> ":" <> style_value <> ";"
+        })
+      dict.insert(acc, key, computed_style)
+    })
+
+  let slass = fn(class) { slass_core(class, style) }
+
+  profile_template(slass)
   |> element.to_string
 }

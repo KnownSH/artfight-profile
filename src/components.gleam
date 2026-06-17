@@ -80,14 +80,9 @@ fn get_orelse(from: Dict(key, value), key: key, orelse: value) -> value {
   }
 }
 
-fn intersperse(list: List(t), seperator: t) -> List(t) {
-  list.flat_map(list, fn(item) { [seperator, item] })
-  |> list.drop(1)
-}
-
 pub fn friends_list() -> Element {
   let friend_list =
-    ini.read("data/friends.conf")
+    ini.read("data/friends.conf", dict.new())
     |> dict.to_list
     |> list.map(fn(value) {
       let #(friend, props) = value
@@ -99,7 +94,7 @@ pub fn friends_list() -> Element {
         html.text(friend),
       ])
     })
-    |> intersperse(
+    |> list.intersperse(
       html.i([attribute.class("fa-solid fa-grip-dots-vertical ml-2 mr-2")], []),
     )
 
