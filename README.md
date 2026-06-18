@@ -1,3 +1,7 @@
+<div align="center">
+  <img width="302" height="462" alt="chrome_sGoisSnbSQ" src="https://github.com/user-attachments/assets/4277564f-5bbd-4750-a225-27b66fa9245b" />
+</div>
+
 # An Artfight profile
 
 [See what it looks like](https://artfight.net/~Knownser)
@@ -12,9 +16,9 @@
 
 ## Little explainer
 
-Inline styles are done via a little DSL called **Slass** (Literally just a portmanteau of Style-Class), it's pretty much just a `.ini` file with the ability to inject mustache `{{variables}}`. It only supports semi-colon comments to make it so you can use hex colour values.
+Inline styles are done via a little DSL called **Slass** (Literally just a portmanteau of Style-Class), it's pretty much just a `.ini` file with the ability to inject mustache `{{variables}}`. It only supports semi-colon prefixes for comments, this is purely to make it so you can use hex colour values in your styles without quotes.
 
-Gleam-wise the slass getter function is passed around to each component, and the returned value is used like a lustre attribute record.
+Gleam-wise the slass getter function is passed around to each component, and the returned value is a lustre attribute.
 
 ---
 
