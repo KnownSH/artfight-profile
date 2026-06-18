@@ -1,8 +1,11 @@
 import gleam/int
 
 pub const float_right = #("float", "right")
+
 pub const text_base = #("font-size", "1rem")
+
 pub const leading_none = #("line-height", "1")
+
 pub const inline_block = #("display", "inline-block")
 
 type StringStyle =
@@ -47,13 +50,14 @@ pub fn border_int(size: Int, style: BorderStyle, color: String) -> StringStyle {
 }
 
 pub fn border(size: String, style: BorderStyle, color: String) -> StringStyle {
-  #(
-    "border",
-    size <> " " <> border_style_map(style) <> " " <> color,
-  )
+  #("border", size <> " " <> border_style_map(style) <> " " <> color)
 }
 
-pub fn border_left_int(size: Int, style: BorderStyle, color: String) -> StringStyle {
+pub fn border_left_int(
+  size: Int,
+  style: BorderStyle,
+  color: String,
+) -> StringStyle {
   #("border-left", base_border_props(size, style, color))
 }
 

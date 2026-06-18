@@ -20,7 +20,7 @@ pub fn read(
     use style_acc, property, value <- dict.fold(properties, "")
     style_acc <> property <> ":" <> value <> ";"
   }
-    
+
   dict.insert(acc, class_name, computed_style)
 }
 

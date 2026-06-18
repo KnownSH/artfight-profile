@@ -10,7 +10,8 @@ type Token {
   Comment
 }
 
-type Parsed = Dict(String, Dict(String, String))
+type Parsed =
+  Dict(String, Dict(String, String))
 
 fn determine_section_token(chunk: String) -> Result(Token, Token) {
   case string.ends_with(chunk, "]") {
@@ -22,7 +23,7 @@ fn determine_section_token(chunk: String) -> Result(Token, Token) {
 fn tokenizer(lines: List(String)) -> List(Token) {
   use line <- list.filter_map(lines)
   let trimmed = string.trim(line)
-  
+
   case trimmed {
     "[" <> sub -> determine_section_token(sub)
     ";" <> _ -> Error(Comment)
@@ -43,9 +44,7 @@ fn resolve_mustache(value: String, variables: Dict(String, String)) -> String {
   })
 }
 
-fn parser(
-  lines: List(String)
-) -> Parsed {
+fn parser(lines: List(String)) -> Parsed {
   let tokens = tokenizer(lines)
   let start_state = #("", dict.new())
 
@@ -62,8 +61,8 @@ fn parser(
           case string.split_once(key_line, on: "=") {
             Ok(#(k, v)) -> {
               let clean_key = string.trim(k)
-              let clean_val = 
-                string.trim(v) 
+              let clean_val =
+                string.trim(v)
                 |> strip_quotes
 
               let section_dict = case dict.get(sections, current_section) {
@@ -71,7 +70,8 @@ fn parser(
                 Error(_) -> dict.from_list([#(clean_key, clean_val)])
               }
 
-              let updated_sections = dict.insert(sections, current_section, section_dict)
+              let updated_sections =
+                dict.insert(sections, current_section, section_dict)
               #(current_section, updated_sections)
             }
             Error(_) -> state
@@ -85,10 +85,7 @@ fn parser(
   parsed
 }
 
-pub fn read(
-  path: String, 
-  variables: Dict(String, String),
-) -> Parsed {
+pub fn read(path: String, variables: Dict(String, String)) -> Parsed {
   let assert Ok(content) = simplifile.read(from: path)
   let lines =
     resolve_mustache(content, variables)

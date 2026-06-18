@@ -1,4 +1,3 @@
-import simplifile
 import colors
 import components
 import css
@@ -7,13 +6,14 @@ import images
 import lustre/attribute.{alt, class, styles}
 import lustre/element
 import lustre/element/html.{div, h2, img, p, text as t}
+import simplifile
 import slass.{type SlassGetter}
 import util
 
 type Element =
   element.Element(Nil)
 
-fn bio_template() -> Element {
+fn bio_template(slass: slass.SlassGetter) -> Element {
   let h2 = h2([], _)
   let span = html.span([], _)
   let sup = html.sup([], _)
@@ -32,13 +32,7 @@ fn bio_template() -> Element {
 
     p([styles([css.text_base])], [
       img([
-        styles([
-          css.float_right,
-          css.margin_bottom("-20px"),
-          css.margin_top("-30px"),
-        ]),
-        attribute.height(150),
-        attribute.width(150),
+        slass(["profile-dead-dog"]),
         images.derg_cdn("doveyknownwomp.webp"),
         alt("derg womp"),
       ])
@@ -52,7 +46,8 @@ fn bio_template() -> Element {
       util.bold_italic(util.quotes("KnownSH") <> "."),
 
       t(
-        "I decided to start drawing about two years ago, so expect my art quality to sometimes be inconsistent!",
+        "I only started drawing about two years ago,
+         so expect my art quality to sometimes be inconsistent!",
       ),
       util.multi_br(count: 2),
       t("This year I'm planning on drawing "),
@@ -164,7 +159,7 @@ fn traits_template(slass: SlassGetter) -> Element {
           [
             div([header_style], [t("My interests!")]),
 
-            components.interests_list([
+            components.interests_list(slass, [
               "Spaceflight",
               "Dergs",
               "3D Modelling",
@@ -179,25 +174,36 @@ fn traits_template(slass: SlassGetter) -> Element {
 }
 
 fn ocs_list(slass: SlassGetter) -> Element {
-  div([
-    class("row mx-auto justify-content-center justify-content-sm-between pt-sm-5 pt-2 pl-2 pr-2 pb-2"),
-    slass(["oc-list-root", "nomargin"])
-  ], [
-    components.oc_card(slass, components.OC(
-      name: "known",
-      bouncer: "asddd.webp",
-      bouncer_credits: "cheripuf",
-      pfp: "https://images.artfight.net/character/yahFYpe5Eoa5c8JoI9UdWoXWOG2n8qoEUGgQZlf2Sqh9XofkUoGpfkzLfQkc.png",
-      url: "https://artfight.net/character/6693652.known",
-    )),
-    components.oc_card(slass, components.OC(
-      name: "vera",
-      bouncer: "veralittle-missdoveyx.webp",
-      bouncer_credits: "missdoveyx",
-      pfp: "https://images.artfight.net/character/th_W0rU0sROmwatI3Yzy1QdJ1oMPWUSYJgfcyg7Lnpdvl5LGb24VkHPqU9zaL2G.png",
-      url: "https://artfight.net/character/8628771.vera",
-    ))
-  ])
+  div(
+    [
+      class(
+        "row mx-auto justify-content-center justify-content-sm-between pt-sm-5 pt-2 pl-2 pr-2 pb-2 p-sm-4 p-0",
+      ),
+      slass(["oc-list-root", "nomargin"]),
+    ],
+    [
+      components.oc_card(
+        slass,
+        components.OC(
+          name: "known",
+          bouncer: "asddd.webp",
+          bouncer_credits: "cheripuf",
+          pfp: "https://images.artfight.net/character/yahFYpe5Eoa5c8JoI9UdWoXWOG2n8qoEUGgQZlf2Sqh9XofkUoGpfkzLfQkc.png",
+          url: "https://artfight.net/character/6693652.known",
+        ),
+      ),
+      components.oc_card(
+        slass,
+        components.OC(
+          name: "vera",
+          bouncer: "veralittle-missdoveyx.webp",
+          bouncer_credits: "missdoveyx",
+          pfp: "https://images.artfight.net/character/th_W0rU0sROmwatI3Yzy1QdJ1oMPWUSYJgfcyg7Lnpdvl5LGb24VkHPqU9zaL2G.png",
+          url: "https://artfight.net/character/8628771.vera",
+        ),
+      ),
+    ],
+  )
 }
 
 fn profile_template(slass: SlassGetter) -> Element {
@@ -208,15 +214,14 @@ fn profile_template(slass: SlassGetter) -> Element {
         slass(["profile-main"]),
       ],
       [
-        div([class("container-sm"), slass(["profile-content"])], [
+        div([class("container-lg"), slass(["profile-content"])], [
           html.br([]),
-          bio_template(),
+          bio_template(slass),
           html.hr([]),
           traits_template(slass),
           util.div_padding(3),
           ocs_list(slass),
           util.div_padding(1),
-          html.hr([attribute.width(200)]),
           components.friends_list(),
           components.breathing_mario(slass),
           util.div_padding(2),
@@ -230,10 +235,11 @@ fn profile_template(slass: SlassGetter) -> Element {
 
 /// Call this via JavaScript ffi
 pub fn render_profile() -> String {
-  let output = slass.read("src/profile.slass.ini", dict.from_list(colors.dcss_vars))
-  |> slass.getter
-  |> profile_template
-  |> element.to_string
+  let output =
+    slass.read("src/profile.slass.ini", dict.from_list(colors.dcss_vars))
+    |> slass.getter
+    |> profile_template
+    |> element.to_string
 
   let _ = simplifile.create_file("out/generated.html")
   let _ = simplifile.write("out/generated.html", output)

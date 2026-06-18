@@ -1,14 +1,16 @@
 //// For anything that is not a base html element wrapper
 
-import images
-import slass
+import gleam/option
+import decoders
 import css
 import gleam/dict.{type Dict}
 import gleam/list
+import images
 import ini
 import lustre/attribute
 import lustre/element
-import lustre/element/html
+import lustre/element/html.{div, text as t}
+import slass.{type SlassGetter}
 
 type Element =
   element.Element(Nil)
@@ -23,7 +25,7 @@ pub fn credits(element: Element, username: String) -> Element {
 }
 
 pub fn priority_root(with_margin: Bool, slot: List(Element)) -> Element {
-  html.div(
+  div(
     [
       attribute.class("d-flex align-items-start"),
 
@@ -37,7 +39,7 @@ pub fn priority_root(with_margin: Bool, slot: List(Element)) -> Element {
 }
 
 pub fn priority_icon(color color: String, fa font_awesome: String) -> Element {
-  html.div(
+  div(
     [
       attribute.styles([
         css.font_size("1.8em"),
@@ -57,22 +59,15 @@ pub fn priority_icon(color color: String, fa font_awesome: String) -> Element {
   )
 }
 
-pub fn interests_list(interests: List(String)) -> Element {
-  let unordered = fn(elements) { html.ul([], elements) }
+pub fn interests_list(slass: SlassGetter, interests: List(String)) -> Element {
+  let unordered = html.ul([], _)
 
-  list.map(interests, fn(interest) {
-    html.li(
-      [
-        attribute.styles([
-          css.font_size("1.08em"),
-          css.margin_top("0.1em"),
-          css.line_height("1.12"),
-        ]),
-      ],
-      [html.text(interest)],
-    )
-  })
-  |> unordered
+  let interests_list = {
+    use interest <- list.map(interests)
+    html.li([slass(["interest-entry"])], [t(interest)])
+  }
+
+  unordered(interests_list)
 }
 
 pub type OC {
@@ -85,141 +80,124 @@ pub type OC {
   )
 }
 
-pub fn oc_card(slass: slass.SlassGetter, oc: OC) -> Element {
-  html.div([
-    attribute.class("col-8 px-0 col-sm-5 mb-3 mb-sm-0 mx-auto mx-sm-0")
-  ], [
-    html.div([slass(["oc-bouncer"])], [
+pub fn oc_card(slass: SlassGetter, oc: OC) -> Element {
+  div([attribute.class("col-5 px-0 mb-3 mb-sm-0 mx-sm-0 mx-auto")], [
+    div([slass(["oc-bouncer"])], [
       html.img([
         images.derg_cdn(oc.bouncer),
         attribute.class("fa-bounce"),
-        slass(["oc-bouncer-" <> oc.name])
-      ])
-      |> credits(oc.bouncer_credits)
+        slass(["oc-bouncer-" <> oc.name]),
+      ]) |> credits(oc.bouncer_credits),
     ]),
 
-    html.a([
-      attribute.href(oc.url),
-      attribute.title(oc.name)
-    ], [
+    html.a([attribute.href(oc.url), attribute.title(oc.name)], [
       html.img([
         attribute.class("d-block w-100"),
         slass(["oc-card"]),
         attribute.src(oc.pfp),
-        attribute.alt(oc.name)
+        attribute.alt(oc.name),
       ]),
-      html.div([
-        attribute.class("pt-1 pt-sm-2 text-center"),
-        attribute.style("color", "#cdd6f4")
-      ], [
-        html.img([
-          images.derg_cdn(oc.name <> "-sm-neon-logo-animated.webp"),
-          attribute.alt("animated text displaying " <> oc.name)
-        ])
-      ])
-    ])
+      div(
+        [
+          attribute.class("pt-1 pt-sm-2 text-center"),
+          attribute.style("color", "#cdd6f4"),
+        ],
+        [
+          html.img([
+            images.derg_cdn(oc.name <> "-sm-neon-logo-animated.webp"),
+            attribute.alt("animated text displaying " <> oc.name),
+          ]),
+        ],
+      ),
+    ]),
   ])
 }
 
-fn get_orelse(from: Dict(key, value), key: key, orelse: value) -> value {
-  case dict.get(from, key) {
-    Ok(val) -> val
-    Error(_) -> orelse
-  }
-}
-
 pub fn friends_list() -> Element {
+  let i = html.i(_, [])
+
   let friend_list =
     ini.read("data/friends.conf", dict.new())
-    |> dict.to_list
-    |> list.map(fn(value) {
-      let #(friend, props) = value
-
-      let link = get_orelse(props, "link", "https://artfight.net/~" <> friend)
-      let color = get_orelse(props, "color", "#ffffff")
-
-      html.a([attribute.href(link), attribute.style("color", color)], [
-        html.text(friend),
+    |> decoders.parse_buddy_data
+    |> list.map(fn(buddy) {
+      html.a([attribute.href(buddy.link), attribute.style("color", buddy.color)], [
+        t(buddy.name),
       ])
     })
     |> list.intersperse(
-      html.i([attribute.class("fa-solid fa-grip-dots-vertical ml-2 mr-2")], []),
+      i([attribute.class("fa-solid fa-grip-dots-vertical ml-2 mr-2")])
     )
 
-  let stars = fn() { html.i([attribute.class("fa-light fa-stars")], []) }
+  let stars = fn() { i([attribute.class("fa-light fa-stars")]) }
 
-  html.div([attribute.class("text-center")], [
-    html.h5([], [stars(), html.text(" Cool people! "), stars()]),
+  div([attribute.class("text-center")], [
+    html.h5([], [stars(), t(" Cool people! "), stars()]),
 
-    html.div(
+    div(
       [attribute.id("friends-list"), attribute.class("d-grid column-gap-3")],
       friend_list,
     ),
   ])
 }
 
-pub fn breathing_mario(slass: slass.SlassGetter) -> Element {
-  html.div([
-    attribute.class("d-flex flex-row"),
-    slass(["breathing-mario"])
-  ], [
-    html.div([attribute.class("p-2"), attribute.style("width", "90%")], []),
+pub fn breathing_mario(slass: SlassGetter) -> Element {
+  div([attribute.class("d-flex flex-row"), slass(["breathing-mario"])], [
+    div([attribute.class("p-2"), attribute.style("width", "90%")], []),
     html.img([
       attribute.class("fa-beat-fade"),
       attribute.width(40),
       images.derg_cdn("breathing-mario.webp"),
-      attribute.alt("breathing buddy")
+      attribute.alt("breathing buddy"),
     ]),
-    html.div([attribute.style("font-size", "0.2em")], [
-      html.text("1.. 2.. 3.. lets see what happens.")
+    div([attribute.style("font-size", "0.2em")], [
+      t("1.. 2.. 3.. lets see what happens."),
     ]),
   ])
 }
 
-pub fn header(slass: slass.SlassGetter) -> Element {
-  html.div([
-    attribute.class("d-flex justify-content-start"),
-    slass(["header"])
-  ], [
-    html.div([
-      slass(["header-fake-button"]),
-      attribute.class("text-center pl-3 pr-3")
-    ], [
-      html.div([attribute.class("d-flex align-items-center")], [
-        html.i([attribute.class("fa-regular fa-file-code pr-2")], []),
-        html.text("pages/knownser.gleam")
-      ])
-    ]),
-    html.div([
-      slass(["header-rest"]),
-      attribute.class("text-center w-100")
-    ], []),
-    html.div([
-      slass(["header-fake-button"]),
-      attribute.class("text-center pl-2 pr-2")
-    ], [html.text("x")]),
+pub fn header(slass: SlassGetter) -> Element {
+  div([attribute.class("d-flex justify-content-start"), slass(["header"])], [
+    div(
+      [slass(["header-fake-button"]), attribute.class("text-center pl-3 pr-3")],
+      [
+        div([attribute.class("d-flex align-items-center")], [
+          html.i([attribute.class("fa-regular fa-file-code pr-2")], []),
+          t("pages/knownser.gleam"),
+        ]),
+      ],
+    ),
+    div([slass(["header-rest"]), attribute.class("text-center w-100")], []),
+    div(
+      [slass(["header-fake-button"]), attribute.class("text-center pl-2 pr-2")],
+      [t("x")],
+    ),
   ])
 }
 
-pub fn footer(slass: slass.SlassGetter) -> Element {
-  html.div([
-    attribute.class("d-flex justify-content-between pr-2"),
-    slass(["footer", "bg-mauve"])
-  ], [
-    html.img([
-      attribute.src("https://cdn.derg.space/counter/knownser.png"),
-      attribute.alt("Visitor counter"),
-      slass(["footer-vistor-counter"]),
-    ]),
-    html.a([
-      attribute.href("https://github.com/KnownSH/artfight-profile"),
-      attribute.class("w-100 pl-3"),
-      slass(["footer-source-align"])
-    ], [
-      html.div(
-        [slass(["footer-source-url-i"])],
-        [html.i([attribute.class("fa-sharp-duotone fa-solid fa-code")], [])]
-      )
-    ]),
-  ])
+pub fn footer(slass: SlassGetter) -> Element {
+  div(
+    [
+      attribute.class("d-flex justify-content-between pr-2"),
+      slass(["footer", "bg-mauve"]),
+    ],
+    [
+      html.img([
+        attribute.src("https://cdn.derg.space/counter/knownser.png"),
+        attribute.alt("Visitor counter"),
+        slass(["footer-vistor-counter"]),
+      ]),
+      html.a(
+        [
+          attribute.href("https://github.com/KnownSH/artfight-profile"),
+          attribute.class("w-100 pl-3"),
+          slass(["footer-source-align"]),
+        ],
+        [
+          div([slass(["footer-source-url-i"])], [
+            html.i([attribute.class("fa-sharp-duotone fa-solid fa-code")], []),
+          ]),
+        ],
+      ),
+    ],
+  )
 }
